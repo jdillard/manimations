@@ -61,12 +61,24 @@ class GitAndTreeSplit(Scene):
             ".",
             "└── packages/"
         ]
+
+        # Create the initial tree structure
         text_objs = [Text(line, font="Courier", font_size=20, color="#93a1a1") for line in tree_lines]
-        tree_group = VGroup(*text_objs).arrange(DOWN, aligned_edge=LEFT).to_edge(LEFT).shift(RIGHT * 0.5)
+        tree_group = VGroup(*text_objs).arrange(DOWN, aligned_edge=LEFT)
+
+        # Position the tree group at the tree_origin
         tree_group.move_to(tree_origin, aligned_edge=UP+RIGHT)
 
         self.play(*[Write(line) for line in tree_group])
         self.wait(0.5)
+
+        # Calculate the position of the 'p' in 'packages/' to use for indentation reference
+        root_line = text_objs[1]  # This is "└── packages/"
+
+        # Find the position of the 'p' in "packages/"
+        # The characters are "└── p" so we need the 5th character
+        p_index = 4  # Zero-based indexing (└, ─, ─, <space>, p)
+        p_position = root_line.get_left() + RIGHT * p_index * root_line.width / len("└── packages/")
 
         # Process commits and tree growth together
         current_block = tree_group
@@ -102,7 +114,11 @@ class GitAndTreeSplit(Scene):
                     for line in develop1_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
-                develop1_block.next_to(current_block, DOWN, aligned_edge=LEFT, buff=block_spacing)
+                # Position the block with proper indentation
+                # Align the left edge of this block with the p_position
+                develop1_block.next_to(current_block, DOWN, buff=block_spacing)
+                develop1_block.align_to(p_position, LEFT)
+
                 self.play(FadeIn(develop1_block), run_time=0.4)
                 last_develop_block = develop1_block
 
@@ -129,7 +145,9 @@ class GitAndTreeSplit(Scene):
                     for line in develop1_updated_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
+                # Ensure the updated block maintains the same position
                 develop1_updated.move_to(develop1_block.get_center())
+                develop1_updated.align_to(develop1_block, LEFT)
 
                 # Prepare HEAD file content
                 develop_head_lines = [
@@ -141,6 +159,7 @@ class GitAndTreeSplit(Scene):
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
                 head_block.next_to(develop1_updated, DOWN, aligned_edge=LEFT, buff=block_spacing)
+                # Align HEAD with the same indentation as the develop1_updated block
                 head_block.align_to(develop1_updated, LEFT)
 
                 # Start fading out the develop glow WHILE updating structure
@@ -196,10 +215,12 @@ class GitAndTreeSplit(Scene):
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
                 # Position develop2_block where it needs to go (after githash1)
-                develop2_block.next_to(last_develop_block, DOWN, aligned_edge=LEFT, buff=block_spacing)
+                develop2_block.next_to(last_develop_block, DOWN, buff=block_spacing)
+                # Maintain the same alignment as last_develop_block
+                develop2_block.align_to(last_develop_block, LEFT)
 
                 # Calculate where HEAD should end up
-                updated_head_block.next_to(develop2_block, DOWN, aligned_edge=LEFT, buff=block_spacing)
+                updated_head_block.next_to(develop2_block, DOWN, buff=block_spacing)
                 updated_head_block.align_to(develop2_block, LEFT)
 
                 # Animate HEAD sliding down to make room for githash2
@@ -251,7 +272,11 @@ class GitAndTreeSplit(Scene):
                     for line in pull_block_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
-                pull_block.next_to(current_block, DOWN, aligned_edge=LEFT, buff=block_spacing)
+                # Position the pull block with proper indentation
+                pull_block.next_to(current_block, DOWN, buff=block_spacing)
+                # Align with the p_position to maintain consistent indentation
+                pull_block.align_to(p_position, LEFT)
+
                 self.play(FadeIn(pull_block), run_time=0.4)
 
                 # Add glow effect for pull/1234 (orange)
@@ -278,7 +303,9 @@ class GitAndTreeSplit(Scene):
                     for line in pull_block_updated_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
+                # Maintain position and alignment of the updated block
                 pull_block_updated.move_to(pull_block.get_center())
+                pull_block_updated.align_to(pull_block, LEFT)
 
                 # Prepare HEAD file content for pull branch
                 head_file_lines = [
@@ -289,7 +316,7 @@ class GitAndTreeSplit(Scene):
                     for line in head_file_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
-                pull_head_block.next_to(pull_block_updated, DOWN, aligned_edge=LEFT, buff=block_spacing)
+                pull_head_block.next_to(pull_block_updated, DOWN, buff=block_spacing)
                 pull_head_block.align_to(pull_block_updated, LEFT)
 
                 # Start fading out the pull glow WHILE updating structure
