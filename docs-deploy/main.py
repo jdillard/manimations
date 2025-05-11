@@ -48,11 +48,14 @@ class GitAndTreeSplit(Scene):
             ("pull", 1),
         ]
 
+        # Define which commit to tag (later)
+        tag_commit = ("develop", 2)  # Tag the second develop commit as v1.0.0
+
         dot_radius = 0.12
         dots = VGroup()
 
-        # Now create tree side
-        tree_origin = RIGHT * 3 + UP * 3
+        # Now create tree side - shifted UP for better vertical centering
+        tree_origin = RIGHT * 2.5 + UP * 3.5  # Moved UP slightly (from UP * 3 to UP * 3.5)
         line_spacing = 0.15  # Reduced spacing between lines
         block_spacing = 0.08  # Reduced spacing between blocks
 
@@ -62,8 +65,8 @@ class GitAndTreeSplit(Scene):
             "└── packages/"
         ]
 
-        # Create the initial tree structure
-        text_objs = [Text(line, font="Courier", font_size=20, color="#93a1a1") for line in tree_lines]
+        # Create the initial tree structure with smaller font size
+        text_objs = [Text(line, font="Courier", font_size=18, color="#93a1a1") for line in tree_lines]  # Reduced from 20 to 18
         tree_group = VGroup(*text_objs).arrange(DOWN, aligned_edge=LEFT)
 
         # Position the tree group at the tree_origin
@@ -110,7 +113,7 @@ class GitAndTreeSplit(Scene):
                     "    │           └── index.html"
                 ]
                 develop1_block = VGroup(*[
-                    Text(line, font="Courier", font_size=18, color="#93a1a1")
+                    Text(line, font="Courier", font_size=16, color="#93a1a1")  # Reduced from 18 to 16
                     for line in develop1_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
@@ -141,7 +144,7 @@ class GitAndTreeSplit(Scene):
                     "    │   │       └── index.html"
                 ]
                 develop1_updated = VGroup(*[
-                    Text(line, font="Courier", font_size=18, color="#93a1a1")
+                    Text(line, font="Courier", font_size=16, color="#93a1a1")  # Reduced from 18 to 16
                     for line in develop1_updated_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
@@ -154,7 +157,7 @@ class GitAndTreeSplit(Scene):
                     "    │   └── HEAD"  # HEAD file as sibling to githash1
                 ]
                 head_block = VGroup(*[
-                    Text(line, font="Courier", font_size=18, color="#93a1a1")
+                    Text(line, font="Courier", font_size=16, color="#93a1a1")  # Reduced from 18 to 16
                     for line in develop_head_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
@@ -201,7 +204,7 @@ class GitAndTreeSplit(Scene):
                     "    │   │       └── index.html"
                 ]
                 develop2_block = VGroup(*[
-                    Text(line, font="Courier", font_size=18, color="#93a1a1")
+                    Text(line, font="Courier", font_size=16, color="#93a1a1")  # Reduced from 18 to 16
                     for line in develop2_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
@@ -210,7 +213,7 @@ class GitAndTreeSplit(Scene):
                     "    │   └── HEAD"  # HEAD remains the last item with └──
                 ]
                 updated_head_block = VGroup(*[
-                    Text(line, font="Courier", font_size=18, color="#93a1a1")
+                    Text(line, font="Courier", font_size=16, color="#93a1a1")  # Reduced from 18 to 16
                     for line in updated_head_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
@@ -268,7 +271,7 @@ class GitAndTreeSplit(Scene):
                     "    │               └── index.html"
                 ]
                 pull_block = VGroup(*[
-                    Text(line, font="Courier", font_size=18, color="#93a1a1")
+                    Text(line, font="Courier", font_size=16, color="#93a1a1")  # Reduced from 18 to 16
                     for line in pull_block_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
@@ -299,7 +302,7 @@ class GitAndTreeSplit(Scene):
                     "    │       │       └── index.html"
                 ]
                 pull_block_updated = VGroup(*[
-                    Text(line, font="Courier", font_size=18, color="#93a1a1")
+                    Text(line, font="Courier", font_size=16, color="#93a1a1")  # Reduced from 18 to 16
                     for line in pull_block_updated_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
@@ -312,7 +315,7 @@ class GitAndTreeSplit(Scene):
                     "    │       └── HEAD"  # HEAD file as sibling to githash3
                 ]
                 pull_head_block = VGroup(*[
-                    Text(line, font="Courier", font_size=18, color="#93a1a1")
+                    Text(line, font="Courier", font_size=16, color="#93a1a1")  # Reduced from 18 to 16
                     for line in head_file_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
@@ -348,6 +351,110 @@ class GitAndTreeSplit(Scene):
 
             # Let each step be visible
             self.wait(0.3)
+
+        # Calculate the position of the tag commit dot
+        tag_branch, tag_index = tag_commit
+        tag_x = start_x + 0.85 + tag_index * x_step
+        tag_y = y_develop if tag_branch == "develop" else y_pull
+
+        # Make the green line 2/3 as long as before (0.6 → 0.4)
+        tag_line_start = [tag_x, tag_y, 0]
+        tag_line_end = [tag_x, tag_y + 0.4, 0]  # Reduced from 0.6 to 0.4 (2/3 of previous length)
+
+        # Define the square position at the end of the line
+        square_position = tag_line_end
+
+        # Create a tag label properly positioned above the square with more space for separation
+        tag_text = Text("v1.0.0", font_size=18, color=GREEN)
+        tag_text.next_to(square_position, UP, buff=0.225)  # Increased buffer by 1.5x (from 0.15 to 0.225)
+
+        # Get the dot at the commit position to place the line behind it
+        commit_dot = None
+        for dot in dots:
+            if np.isclose(dot.get_center()[0], tag_x) and np.isclose(dot.get_center()[1], tag_y):
+                commit_dot = dot
+                break
+
+        # Create the line but make it invisible initially - PLACE IT BEHIND THE DOT
+        tag_line = Line(tag_line_start, tag_line_start, color=GREEN)
+
+        # If we found the commit dot, add the line BEHIND it
+        if commit_dot:
+            self.remove(commit_dot)
+            self.add(tag_line)
+            self.add(commit_dot)  # Re-add the dot to ensure it's in front
+        else:
+            self.add(tag_line)
+
+        # Animate the line growing upward
+        grow_line = tag_line.animate.put_start_and_end_on(tag_line_start, tag_line_end)
+        self.play(grow_line, run_time=0.3)
+
+        # Create a filled square instead of an empty one
+        tag_square = Square(side_length=dot_radius*1.5, color=GREEN, fill_color=GREEN, fill_opacity=1).move_to(square_position)
+
+        # Fade in the square and the text at the same time
+        self.play(
+            FadeIn(tag_square),
+            FadeIn(tag_text),
+            run_time=0.4
+        )
+
+        # Now update the directory tree to include the tags directory
+        tags_block_lines = [
+            "    ├── tags/",
+            "    │   └── v1.0.0/",  # The tag itself
+            "    │       └── my-package/",  # Directly to my-package (no githash2 directory)
+            "    │           └── index.html"
+        ]
+
+        tags_block = VGroup(*[
+            Text(line, font="Courier", font_size=16, color="#93a1a1")  # Reduced from 18 to 16
+            for line in tags_block_lines
+        ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
+
+        # Instead of trying to find the pull directory in existing tree,
+        # let's position the tags directory based on what we know
+        # Position it after current_block (the pull HEAD block)
+        tags_block.next_to(current_block, DOWN, buff=block_spacing)
+        tags_block.align_to(p_position, LEFT)
+
+        # Create a replacement for the pull block first line (changing ├── to └──)
+        # Since we know that the pull_block variable contains our pull directory block
+        # We need a simpler approach that doesn't try to search through all mobjects
+        pull_first_line_replacement = Text("    └── pull/", font="Courier", font_size=18, color="#93a1a1")
+
+        # Find the first line of the existing pull block
+        # Pull block is already tracked from commit 3
+        if isinstance(pull_block, VGroup) and len(pull_block) > 0:
+            # Get the first submobject (first line) of the pull block
+            pull_first_line = pull_block[0]  # First item in the VGroup
+
+            # Position the replacement text
+            pull_first_line_replacement.move_to(pull_first_line.get_center())
+            pull_first_line_replacement.align_to(pull_first_line, LEFT)
+
+        # Create the animation for the tags directory
+        self.play(FadeIn(tags_block), run_time=0.6)
+
+        # If we found the pull first line, update it to be the last item (└── instead of ├──)
+        if 'pull_first_line' in locals() and 'pull_first_line_replacement' in locals():
+            self.play(
+                Transform(pull_first_line, pull_first_line_replacement),
+                run_time=0.3
+            )
+
+        # Add glow effect for the tags directory
+        glow_tags = tags_block.copy()
+        glow_tags.set_color(GREEN)
+        glow_tags.set_stroke(width=4)
+
+        # Apply glow animation
+        self.play(
+            FadeIn(glow_tags, rate_func=lambda t: np.sin(t * np.pi)),
+            run_time=0.8
+        )
+        self.play(FadeOut(glow_tags), run_time=0.4)
 
         # Final pause to see the completed visualization
         self.wait(2)
