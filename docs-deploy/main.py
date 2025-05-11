@@ -8,8 +8,8 @@ class GitAndTreeSplit(Scene):
         # Create the Git flow diagram on the left side
         git_group = VGroup()
 
-        # Define start points for branches - MODIFIED: moved everything right
-        start_x = -5  # Changed from -6 to -5 to move everything right
+        # Define start points for branches
+        start_x = -5
         x_step = 1.2
 
         # Branch Y positions
@@ -22,16 +22,15 @@ class GitAndTreeSplit(Scene):
             ("pull/1234", y_pull, ORANGE)
         ]
 
-        # Create labels - MODIFIED: moved labels more to the right
+        # Create labels
         branch_labels = VGroup()
         for name, y, color in labels:
-            # Changed LEFT to LEFT + RIGHT * 1.0 to move labels further to the right
             label = Text(name, font_size=24, color=color).next_to([start_x, y, 0], LEFT + RIGHT * 1.0)
             self.play(Write(label), run_time=0.3)
             branch_labels.add(label)
             git_group.add(label)
 
-        # Initialize paths - MODIFIED: adjusted line positions (compromise between previous values)
+        # Initialize paths
         lines = {
             "develop": Line([start_x + 0.85, y_develop, 0], [start_x + 0.85, y_develop, 0], color=BLUE),
             "pull": Line([start_x + 0.85, y_pull, 0], [start_x + 0.85, y_pull, 0], color=ORANGE),
@@ -42,14 +41,11 @@ class GitAndTreeSplit(Scene):
             self.play(Create(line), run_time=0.2)
             git_group.add(line)
 
-        # MODIFIED: Reduced to only 3 commits
+        # Define commits
         commits = [
             ("develop", 1),
             ("develop", 2),
             ("pull", 1),
-            # Removed the last two commits:
-            # ("develop", 3),
-            # ("pull", 2),
         ]
 
         dot_radius = 0.12
@@ -74,10 +70,14 @@ class GitAndTreeSplit(Scene):
 
         # Process commits and tree growth together
         current_block = tree_group
+        head_block = None  # Reference to track the HEAD block
+
+        # We'll keep track of the last commit block for each branch
+        last_develop_block = None
 
         for i, (branch, index) in enumerate(commits):
             # Git side: Extend branch line
-            x = start_x + 0.85 + index * x_step  # MODIFIED: Using compromise value of 0.85
+            x = start_x + 0.85 + index * x_step
             y = y_develop if branch == "develop" else y_pull
 
             # Grow line
@@ -104,17 +104,17 @@ class GitAndTreeSplit(Scene):
 
                 develop1_block.next_to(current_block, DOWN, aligned_edge=LEFT, buff=block_spacing)
                 self.play(FadeIn(develop1_block), run_time=0.4)
+                last_develop_block = develop1_block
 
                 # Add glow effect for develop/githash1 (blue)
-                # Create copy for glow effect
                 glow_develop1 = develop1_block.copy()
                 glow_develop1.set_color(BLUE)
                 glow_develop1.set_stroke(width=4)
 
-                # Apply glow animation - make it faster
+                # Apply glow animation
                 self.play(
                     FadeIn(glow_develop1, rate_func=lambda t: np.sin(t * np.pi)),
-                    run_time=0.6  # Super short glow animation
+                    run_time=0.6
                 )
 
                 # Prepare updated develop block structure to change └── to ├── for githash1
@@ -135,82 +135,108 @@ class GitAndTreeSplit(Scene):
                 develop_head_lines = [
                     "    │   └── HEAD"  # HEAD file as sibling to githash1
                 ]
-                develop_head_block = VGroup(*[
+                head_block = VGroup(*[
                     Text(line, font="Courier", font_size=18, color="#93a1a1")
                     for line in develop_head_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
-                develop_head_block.next_to(develop1_updated, DOWN, aligned_edge=LEFT, buff=block_spacing)
-                develop_head_block.align_to(develop1_updated, LEFT)
+                head_block.next_to(develop1_updated, DOWN, aligned_edge=LEFT, buff=block_spacing)
+                head_block.align_to(develop1_updated, LEFT)
 
-                # Start fading out the develop glow WHILE simultaneously updating structure
-                # This creates more overlap between animations
+                # Start fading out the develop glow WHILE updating structure
                 self.play(
                     FadeOut(glow_develop1, run_time=0.25),
-                    Transform(develop1_block, develop1_updated, run_time=0.3)  # Slightly longer so it extends beyond the fadeout
+                    Transform(develop1_block, develop1_updated, run_time=0.3)
                 )
 
-                # Begin fading in the HEAD file before the structure update is fully complete
-                # Start HEAD file fade-in animation without waiting for previous animation to complete
-                self.add(develop_head_block.set_opacity(0))  # Add with opacity 0 (invisible)
-                head_fade_in = develop_head_block.animate.set_opacity(1)  # Animation to fade in
-
-                # Play both animations simultaneously with a slight offset
-                # This creates the effect of HEAD appearing while structure is still updating
+                # Fade in the HEAD file
+                self.add(head_block.set_opacity(0))
+                head_fade_in = head_block.animate.set_opacity(1)
                 self.play(head_fade_in, run_time=0.2)
 
-                # Start the HEAD glow effect while the HEAD is still appearing
-                # This creates maximum overlap between animations
-                glow_develop_head = develop_head_block.copy()
-                glow_develop_head.set_color(BLUE)  # Blue to match develop branch
+                # Start the HEAD glow effect
+                glow_develop_head = head_block.copy()
+                glow_develop_head.set_color(BLUE)
                 glow_develop_head.set_stroke(width=4)
-                glow_develop_head.set_opacity(0)  # Start invisible
-                self.add(glow_develop_head)  # Add to scene but invisible
+                glow_develop_head.set_opacity(0)
+                self.add(glow_develop_head)
 
-                # Fade in the glow simultaneously with the HEAD file's appearance
-                # This creates the effect of the HEAD starting to glow right as it appears
+                # Fade in and animate the glow
                 glow_fade_in = glow_develop_head.animate.set_opacity(1)
                 self.play(glow_fade_in, run_time=0.3)
-
-                # Complete the glow effect - shorter and faster
                 glow_pulse = glow_develop_head.animate.set_opacity(0.8)
                 self.play(glow_pulse, run_time=0.2)
                 self.play(FadeOut(glow_develop_head), run_time=0.3)
 
-                current_block = develop_head_block
+                current_block = head_block
+                last_develop_block = develop1_block  # Keep track of last develop block
 
             elif i == 1:  # Second develop commit
-                # Now we need to handle the transition from the structure with HEAD
-                # First, update to add githash2 block
+                # First, we need to update the structure to show ├── for githash1
+                # We'll shift the HEAD file down to make room for githash2
+
+                # Prepare the githash2 block
                 develop2_lines = [
-                    "    │   └── githash2/",
-                    "    │       └── my-package/",
-                    "    │           └── index.html"
+                    "    │   ├── githash2/",  # Using ├── instead of └── since HEAD will come after
+                    "    │   │   └── my-package/",
+                    "    │   │       └── index.html"
                 ]
                 develop2_block = VGroup(*[
                     Text(line, font="Courier", font_size=18, color="#93a1a1")
                     for line in develop2_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
-                # Position needs to account for HEAD that's already there
-                develop2_block.next_to(current_block, DOWN, aligned_edge=LEFT, buff=block_spacing)
-                develop2_block.align_to(current_block, LEFT)
+                # Update HEAD line to show as └── since it will be the last item
+                updated_head_lines = [
+                    "    │   └── HEAD"  # HEAD remains the last item with └──
+                ]
+                updated_head_block = VGroup(*[
+                    Text(line, font="Courier", font_size=18, color="#93a1a1")
+                    for line in updated_head_lines
+                ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
+
+                # Position develop2_block where it needs to go (after githash1)
+                develop2_block.next_to(last_develop_block, DOWN, aligned_edge=LEFT, buff=block_spacing)
+
+                # Calculate where HEAD should end up
+                updated_head_block.next_to(develop2_block, DOWN, aligned_edge=LEFT, buff=block_spacing)
+                updated_head_block.align_to(develop2_block, LEFT)
+
+                # Animate HEAD sliding down to make room for githash2
+                self.play(
+                    current_block.animate.move_to(updated_head_block.get_center()),
+                    run_time=0.4
+                )
+
+                # Now fade in githash2
                 self.play(FadeIn(develop2_block), run_time=0.4)
 
-                # Add glow effect for develop/githash2 (blue)
-                # Create copy for glow effect
+                # Glow effect for githash2
                 glow_develop2 = develop2_block.copy()
                 glow_develop2.set_color(BLUE)
                 glow_develop2.set_stroke(width=4)
 
-                # Apply glow animation
+                # Apply glow animation to githash2
                 self.play(
                     FadeIn(glow_develop2, rate_func=lambda t: np.sin(t * np.pi)),
-                    run_time=1
+                    run_time=0.6
                 )
-                self.play(FadeOut(glow_develop2), run_time=0.5)
+                self.play(FadeOut(glow_develop2), run_time=0.3)
 
-                current_block = develop2_block
+                # Now glow the HEAD file to show it's being updated
+                glow_head = current_block.copy()
+                glow_head.set_color(BLUE)
+                glow_head.set_stroke(width=4)
+
+                # Apply glow animation for HEAD update
+                self.play(
+                    FadeIn(glow_head, rate_func=lambda t: np.sin(t * np.pi)),
+                    run_time=0.6
+                )
+                self.play(FadeOut(glow_head), run_time=0.3)
+
+                # Keep track of the new commit block
+                last_develop_block = develop2_block
 
             elif i == 2:  # First pull request commit
                 pull_block_lines = [
@@ -229,19 +255,15 @@ class GitAndTreeSplit(Scene):
                 self.play(FadeIn(pull_block), run_time=0.4)
 
                 # Add glow effect for pull/1234 (orange)
-                # Create copy for glow effect
                 glow_pull = pull_block.copy()
                 glow_pull.set_color(ORANGE)
                 glow_pull.set_stroke(width=4)
 
-                # Start the pull/1234 glow animation - even faster
+                # Start the pull/1234 glow animation
                 self.play(
                     FadeIn(glow_pull, rate_func=lambda t: np.sin(t * np.pi)),
-                    run_time=0.6  # Super short glow animation
+                    run_time=0.6
                 )
-
-                # Set current_block for subsequent animations
-                current_block = pull_block
 
                 # Prepare updated pull block structure
                 pull_block_updated_lines = [
@@ -256,57 +278,46 @@ class GitAndTreeSplit(Scene):
                     for line in pull_block_updated_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
-                pull_block_updated.move_to(current_block.get_center())
+                pull_block_updated.move_to(pull_block.get_center())
 
-                # Prepare HEAD file content
+                # Prepare HEAD file content for pull branch
                 head_file_lines = [
                     "    │       └── HEAD"  # HEAD file as sibling to githash3
                 ]
-                head_file_block = VGroup(*[
+                pull_head_block = VGroup(*[
                     Text(line, font="Courier", font_size=18, color="#93a1a1")
                     for line in head_file_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
-                head_file_block.next_to(pull_block_updated, DOWN, aligned_edge=LEFT, buff=block_spacing)
-                head_file_block.align_to(pull_block_updated, LEFT)
+                pull_head_block.next_to(pull_block_updated, DOWN, aligned_edge=LEFT, buff=block_spacing)
+                pull_head_block.align_to(pull_block_updated, LEFT)
 
-                # Start fading out the pull glow WHILE simultaneously updating structure
-                # This creates more overlap between animations
+                # Start fading out the pull glow WHILE updating structure
                 self.play(
                     FadeOut(glow_pull, run_time=0.25),
-                    Transform(current_block, pull_block_updated, run_time=0.3)  # Slightly longer so it extends beyond the fadeout
+                    Transform(pull_block, pull_block_updated, run_time=0.3)
                 )
 
-                # Begin fading in the HEAD file before the structure update is fully complete
-                # Start HEAD file fade-in animation without waiting for previous animation to complete
-                self.add(head_file_block.set_opacity(0))  # Add with opacity 0 (invisible)
-                head_fade_in = head_file_block.animate.set_opacity(1)  # Animation to fade in
-
-                # Play both animations simultaneously with a slight offset
-                # This creates the effect of HEAD appearing while structure is still updating
+                # Fade in the HEAD file
+                self.add(pull_head_block.set_opacity(0))
+                head_fade_in = pull_head_block.animate.set_opacity(1)
                 self.play(head_fade_in, run_time=0.2)
 
-                # The pull_block structure has already been updated in the previous step
-
-                # Start the HEAD glow effect while the HEAD is still appearing
-                # This creates maximum overlap between animations
-                glow_head = head_file_block.copy()
+                # Start the HEAD glow effect
+                glow_head = pull_head_block.copy()
                 glow_head.set_color(ORANGE)
                 glow_head.set_stroke(width=4)
-                glow_head.set_opacity(0)  # Start invisible
-                self.add(glow_head)  # Add to scene but invisible
+                glow_head.set_opacity(0)
+                self.add(glow_head)
 
-                # Fade in the glow simultaneously with the HEAD file's appearance
-                # This creates the effect of the HEAD starting to glow right as it appears
+                # Fade in and animate the glow
                 glow_fade_in = glow_head.animate.set_opacity(1)
                 self.play(glow_fade_in, run_time=0.3)
-
-                # Complete the glow effect - shorter and faster
                 glow_pulse = glow_head.animate.set_opacity(0.8)
                 self.play(glow_pulse, run_time=0.2)
                 self.play(FadeOut(glow_head), run_time=0.3)
 
-                current_block = head_file_block
+                current_block = pull_head_block
 
             # Let each step be visible
             self.wait(0.3)
