@@ -1,6 +1,6 @@
 # Manimations
 
-My collection of manim animations.
+My collection of [manim](https://github.com/ManimCommunity/manim) animations.
 
 ## demo
 
