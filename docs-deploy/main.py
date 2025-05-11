@@ -3,6 +3,8 @@ from manim import *
 
 class GitAndTreeSplit(Scene):
     def construct(self):
+        self.camera.background_color = "#002b36"
+
         # Create the Git flow diagram on the left side
         git_group = VGroup()
         
@@ -63,7 +65,7 @@ class GitAndTreeSplit(Scene):
             ".",
             "└── packages/"
         ]
-        text_objs = [Text(line, font="Courier", font_size=20) for line in tree_lines]  # Reduced from 28 to 20
+        text_objs = [Text(line, font="Courier", font_size=20, color="#93a1a1") for line in tree_lines]
         tree_group = VGroup(*text_objs).arrange(DOWN, aligned_edge=LEFT).to_edge(LEFT).shift(RIGHT * 0.5)
         tree_group.move_to(tree_origin, aligned_edge=UP+RIGHT)
 
@@ -96,7 +98,7 @@ class GitAndTreeSplit(Scene):
                     "    │           └── index.html"
                 ]
                 develop1_block = VGroup(*[
-                    Text(line, font="Courier", font_size=18)  # Reduced from 26 to 18
+                    Text(line, font="Courier", font_size=18, color="#93a1a1")
                     for line in develop1_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
                 
@@ -127,7 +129,7 @@ class GitAndTreeSplit(Scene):
                     "    │   │       └── index.html"
                 ]
                 develop1_updated = VGroup(*[
-                    Text(line, font="Courier", font_size=18)  # Reduced from 26 to 18
+                    Text(line, font="Courier", font_size=18, color="#93a1a1")
                     for line in develop1_updated_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
                 
@@ -141,7 +143,7 @@ class GitAndTreeSplit(Scene):
                     "    │           └── index.html"
                 ]
                 develop2_block = VGroup(*[
-                    Text(line, font="Courier", font_size=18)  # Reduced from 26 to 18
+                    Text(line, font="Courier", font_size=18, color="#93a1a1")
                     for line in develop2_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
                 
@@ -173,7 +175,7 @@ class GitAndTreeSplit(Scene):
                     "    │               └── index.html"
                 ]
                 pull_block = VGroup(*[
-                    Text(line, font="Courier", font_size=18)  # Reduced from 26 to 18
+                    Text(line, font="Courier", font_size=18, color="#93a1a1")
                     for line in pull_block_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
                 
