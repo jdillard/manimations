@@ -78,7 +78,7 @@ class GitAndTreeSplit(Scene):
         # Initial tree structure
         tree_lines = [
             ".",
-            "└── packages/"
+            "└── modules/"
         ]
 
         # Create the root tree structure
@@ -93,9 +93,9 @@ class GitAndTreeSplit(Scene):
         self.wait(0.5)
 
         # Calculate reference point for consistent indentation
-        root_line = text_objs[1]  # "└── packages/" line
-        p_index = 4  # Position of 'p' in "packages/" (0-indexed)
-        p_position = root_line.get_left() + RIGHT * p_index * root_line.width / len("└── packages/")
+        root_line = text_objs[1]  # "└── modules/" line
+        p_index = 4  # Position of 'p' in "modules/" (0-indexed)
+        p_position = root_line.get_left() + RIGHT * p_index * root_line.width / len("└── modules/")
 
         # Initialize variables to track tree blocks
         current_block = tree_group
@@ -123,7 +123,7 @@ class GitAndTreeSplit(Scene):
                 develop1_lines = [
                     "    ├── develop/",
                     "    │   └── githash1/",
-                    "    │       └── my-package/",
+                    "    │       └── module1/",
                     "    │           └── index.html"
                 ]
                 develop1_block = VGroup(*[
@@ -155,7 +155,7 @@ class GitAndTreeSplit(Scene):
                 develop1_updated_lines = [
                     "    ├── develop/",
                     "    │   ├── githash1/",  # Changed from └── to ├──
-                    "    │   │   └── my-package/",
+                    "    │   │   └── module1/",
                     "    │   │       └── index.html"
                 ]
                 develop1_updated = VGroup(*[
@@ -212,7 +212,7 @@ class GitAndTreeSplit(Scene):
                 # Create directory structure for second develop commit
                 develop2_lines = [
                     "    │   ├── githash2/",
-                    "    │   │   └── my-package/",
+                    "    │   │   └── module1/",
                     "    │   │       └── index.html"
                 ]
                 develop2_block = VGroup(*[
@@ -279,7 +279,7 @@ class GitAndTreeSplit(Scene):
                     "    ├── pull/",
                     "    │   └── 1234/",
                     "    │       └── githash3/",
-                    "    │           └── my-package/",
+                    "    │           └── module1/",
                     "    │               └── index.html"
                 ]
                 pull_block = VGroup(*[
@@ -310,7 +310,7 @@ class GitAndTreeSplit(Scene):
                     "    ├── pull/",
                     "    │   └── 1234/",
                     "    │       ├── githash3/",  # Changed from └── to ├──
-                    "    │       │   └── my-package/",
+                    "    │       │   └── module1/",
                     "    │       │       └── index.html"
                 ]
                 pull_block_updated = VGroup(*[
@@ -416,7 +416,7 @@ class GitAndTreeSplit(Scene):
         tags_block_lines = [
             "    ├── tags/",
             "    │   └── v1.0.0/",  # The tag itself
-            "    │       └── my-package/",  # Direct path to content
+            "    │       └── module1/",  # Direct path to content
             "    │           └── index.html"
         ]
 
