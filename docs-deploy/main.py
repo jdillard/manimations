@@ -111,20 +111,16 @@ class GitAndTreeSplit(Scene):
                 glow_develop1.set_color(BLUE)
                 glow_develop1.set_stroke(width=4)
 
-                # Apply glow animation
+                # Apply glow animation - make it faster
                 self.play(
                     FadeIn(glow_develop1, rate_func=lambda t: np.sin(t * np.pi)),
-                    run_time=1
+                    run_time=0.6  # Super short glow animation
                 )
-                self.play(FadeOut(glow_develop1), run_time=0.5)
 
-                current_block = develop1_block
-
-            elif i == 1:  # Second develop commit
-                # Update develop1 to change └── to ├── for githash1
+                # Prepare updated develop block structure to change └── to ├── for githash1
                 develop1_updated_lines = [
                     "    ├── develop/",
-                    "    │   ├── githash1/",
+                    "    │   ├── githash1/",  # Changed from └── to ├──
                     "    │   │   └── my-package/",
                     "    │   │       └── index.html"
                 ]
@@ -133,10 +129,59 @@ class GitAndTreeSplit(Scene):
                     for line in develop1_updated_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
-                develop1_updated.move_to(current_block.get_center())
-                self.play(Transform(current_block, develop1_updated), run_time=0.4)
+                develop1_updated.move_to(develop1_block.get_center())
 
-                # Add githash3
+                # Prepare HEAD file content
+                develop_head_lines = [
+                    "    │   └── HEAD"  # HEAD file as sibling to githash1
+                ]
+                develop_head_block = VGroup(*[
+                    Text(line, font="Courier", font_size=18, color="#93a1a1")
+                    for line in develop_head_lines
+                ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
+
+                develop_head_block.next_to(develop1_updated, DOWN, aligned_edge=LEFT, buff=block_spacing)
+                develop_head_block.align_to(develop1_updated, LEFT)
+
+                # Start fading out the develop glow WHILE simultaneously updating structure
+                # This creates more overlap between animations
+                self.play(
+                    FadeOut(glow_develop1, run_time=0.25),
+                    Transform(develop1_block, develop1_updated, run_time=0.3)  # Slightly longer so it extends beyond the fadeout
+                )
+
+                # Begin fading in the HEAD file before the structure update is fully complete
+                # Start HEAD file fade-in animation without waiting for previous animation to complete
+                self.add(develop_head_block.set_opacity(0))  # Add with opacity 0 (invisible)
+                head_fade_in = develop_head_block.animate.set_opacity(1)  # Animation to fade in
+
+                # Play both animations simultaneously with a slight offset
+                # This creates the effect of HEAD appearing while structure is still updating
+                self.play(head_fade_in, run_time=0.2)
+
+                # Start the HEAD glow effect while the HEAD is still appearing
+                # This creates maximum overlap between animations
+                glow_develop_head = develop_head_block.copy()
+                glow_develop_head.set_color(BLUE)  # Blue to match develop branch
+                glow_develop_head.set_stroke(width=4)
+                glow_develop_head.set_opacity(0)  # Start invisible
+                self.add(glow_develop_head)  # Add to scene but invisible
+
+                # Fade in the glow simultaneously with the HEAD file's appearance
+                # This creates the effect of the HEAD starting to glow right as it appears
+                glow_fade_in = glow_develop_head.animate.set_opacity(1)
+                self.play(glow_fade_in, run_time=0.3)
+
+                # Complete the glow effect - shorter and faster
+                glow_pulse = glow_develop_head.animate.set_opacity(0.8)
+                self.play(glow_pulse, run_time=0.2)
+                self.play(FadeOut(glow_develop_head), run_time=0.3)
+
+                current_block = develop_head_block
+
+            elif i == 1:  # Second develop commit
+                # Now we need to handle the transition from the structure with HEAD
+                # First, update to add githash2 block
                 develop2_lines = [
                     "    │   └── githash2/",
                     "    │       └── my-package/",
@@ -147,11 +192,12 @@ class GitAndTreeSplit(Scene):
                     for line in develop2_lines
                 ]).arrange(DOWN, aligned_edge=LEFT, buff=line_spacing)
 
+                # Position needs to account for HEAD that's already there
                 develop2_block.next_to(current_block, DOWN, aligned_edge=LEFT, buff=block_spacing)
                 develop2_block.align_to(current_block, LEFT)
                 self.play(FadeIn(develop2_block), run_time=0.4)
 
-                # Add glow effect for develop/githash3 (blue)
+                # Add glow effect for develop/githash2 (blue)
                 # Create copy for glow effect
                 glow_develop2 = develop2_block.copy()
                 glow_develop2.set_color(BLUE)
