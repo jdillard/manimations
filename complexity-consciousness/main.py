@@ -544,4 +544,189 @@ class ComplexityConsciousness(Scene):
             rate_func=there_and_back
         )
 
-        self.wait(1)
+        self.wait(0.5)
+
+        # ===== COMMIT 6: STAGE 4 - ORGANISMS =====
+
+        # Define position on curve for organisms (higher complexity)
+        organisms_x = 7.0
+        organisms_y = complexity_curve(organisms_x)
+        organisms_point = axes.coords_to_point(organisms_x, organisms_y)
+
+        # Move marker to new position and fade out cell
+        self.play(
+            stage_marker.animate.move_to(organisms_point).set_color(RED),
+            FadeOut(cell_membrane),
+            FadeOut(cell_organelles),
+            FadeOut(cells_label),
+            FadeOut(cells_label_line),
+            run_time=1.5
+        )
+
+        self.wait(0.5)
+
+        # Create multiple cells forming a network
+        num_cells = 6
+        cell_positions = [
+            organisms_point + UP * 0.6,
+            organisms_point + DOWN * 0.6,
+            organisms_point + LEFT * 0.7 + UP * 0.3,
+            organisms_point + RIGHT * 0.7 + UP * 0.3,
+            organisms_point + LEFT * 0.7 + DOWN * 0.3,
+            organisms_point + RIGHT * 0.7 + DOWN * 0.3,
+        ]
+
+        cells_network = VGroup()
+        for pos in cell_positions:
+            cell = Circle(
+                radius=0.25,
+                color=RED,
+                stroke_width=2,
+                fill_opacity=0.1,
+                fill_color=RED
+            ).move_to(pos)
+            cells_network.add(cell)
+
+        # Animate cells appearing
+        self.play(
+            LaggedStart(
+                *[FadeIn(cell) for cell in cells_network],
+                lag_ratio=0.15
+            ),
+            run_time=2
+        )
+
+        self.wait(0.5)
+
+        # Create nervous system as branching network
+        # Central node (brain representation)
+        brain_node = Circle(
+            radius=0.15,
+            color=YELLOW,
+            stroke_width=2,
+            fill_opacity=0.4,
+            fill_color=YELLOW
+        ).move_to(organisms_point + UP * 0.6)
+
+        # Neural connections between cells
+        neural_connections = VGroup()
+        connection_pairs = [
+            (0, 2), (0, 3), (1, 4), (1, 5),  # From top and bottom cells
+            (2, 4), (3, 5), (2, 3), (4, 5),  # Cross connections
+        ]
+
+        for i, j in connection_pairs:
+            line = Line(
+                cell_positions[i],
+                cell_positions[j],
+                color=YELLOW,
+                stroke_width=2,
+                stroke_opacity=0.6
+            )
+            neural_connections.add(line)
+
+        # Show nervous system emerging
+        self.play(
+            FadeIn(brain_node),
+            run_time=0.8
+        )
+
+        self.play(
+            LaggedStart(
+                *[Create(line) for line in neural_connections],
+                lag_ratio=0.1
+            ),
+            run_time=2
+        )
+
+        self.wait(0.5)
+
+        # Create firing/pulsing neural signals
+        # Create dots that travel along connections
+        signal_dots = VGroup()
+        for line in neural_connections[:4]:  # Use first 4 connections
+            dot = Dot(
+                line.get_start(),
+                color=YELLOW,
+                radius=0.08
+            )
+            signal_dots.add(dot)
+
+        self.play(
+            *[FadeIn(dot) for dot in signal_dots],
+            run_time=0.3
+        )
+
+        # Animate signals traveling along connections
+        signal_animations = []
+        for i, dot in enumerate(signal_dots):
+            line = neural_connections[i]
+            signal_animations.append(
+                dot.animate.move_to(line.get_end())
+            )
+
+        self.play(
+            *signal_animations,
+            run_time=1.5,
+            rate_func=smooth
+        )
+
+        # Fade out and repeat with different connections
+        self.play(
+            *[FadeOut(dot) for dot in signal_dots],
+            run_time=0.3
+        )
+
+        # Second wave of signals
+        signal_dots_2 = VGroup()
+        for line in neural_connections[4:]:  # Use remaining connections
+            dot = Dot(
+                line.get_start(),
+                color=YELLOW,
+                radius=0.08
+            )
+            signal_dots_2.add(dot)
+
+        self.play(
+            *[FadeIn(dot) for dot in signal_dots_2],
+            run_time=0.3
+        )
+
+        signal_animations_2 = []
+        for i, dot in enumerate(signal_dots_2):
+            line = neural_connections[i + 4]
+            signal_animations_2.append(
+                dot.animate.move_to(line.get_end())
+            )
+
+        self.play(
+            *signal_animations_2,
+            run_time=1.5,
+            rate_func=smooth
+        )
+
+        self.play(
+            *[FadeOut(dot) for dot in signal_dots_2],
+            run_time=0.3
+        )
+
+        # Add "Organisms" label
+        organisms_label = Text("Organisms", font_size=28, color=RED)
+        organisms_label.next_to(organisms_point, RIGHT, buff=0.8)
+
+        # Label line
+        organisms_label_line = Line(
+            organisms_point,
+            organisms_label.get_corner(LEFT),
+            color=RED,
+            stroke_width=1.5,
+            stroke_opacity=0.6
+        )
+
+        self.play(
+            Create(organisms_label_line),
+            Write(organisms_label),
+            run_time=1
+        )
+
+        self.wait(2)
