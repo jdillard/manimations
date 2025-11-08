@@ -264,4 +264,144 @@ class ComplexityConsciousness(Scene):
         electron1.remove_updater(update_electron1)
         electron2.remove_updater(update_electron2)
 
+        self.wait(0.5)
+
+        # ===== COMMIT 4: STAGE 2 - MOLECULES =====
+
+        # Define position on curve for molecules (higher complexity)
+        molecules_x = 3.5
+        molecules_y = complexity_curve(molecules_x)
+        molecules_point = axes.coords_to_point(molecules_x, molecules_y)
+
+        # Create new stage marker
+        molecules_marker = Dot(molecules_point, color=PURPLE, radius=0.1)
+
+        # Fade out atom structure and move marker to new position
+        self.play(
+            stage_marker.animate.move_to(molecules_point).set_color(PURPLE),
+            FadeOut(atom_structure),
+            FadeOut(atoms_label),
+            FadeOut(label_line),
+            run_time=1.5
+        )
+
+        self.wait(0.5)
+
+        # Create simple molecule structure (like water - 3 atoms bonded)
+        # Central atom
+        center_atom = Dot(molecules_point, color=PURPLE_B, radius=0.15)
+
+        # Side atoms
+        atom_left = Dot(molecules_point + LEFT * 0.5 + UP * 0.3, color=PURPLE_C, radius=0.12)
+        atom_right = Dot(molecules_point + RIGHT * 0.5 + UP * 0.3, color=PURPLE_C, radius=0.12)
+
+        # Bonds (lines connecting atoms)
+        bond_left = Line(
+            center_atom.get_center(),
+            atom_left.get_center(),
+            color=PURPLE,
+            stroke_width=3
+        )
+        bond_right = Line(
+            center_atom.get_center(),
+            atom_right.get_center(),
+            color=PURPLE,
+            stroke_width=3
+        )
+
+        simple_molecule = VGroup(bond_left, bond_right, center_atom, atom_left, atom_right)
+
+        # Animate atoms appearing and bonds forming
+        self.play(
+            FadeIn(center_atom),
+            FadeIn(atom_left),
+            FadeIn(atom_right),
+            run_time=1
+        )
+
+        self.play(
+            Create(bond_left),
+            Create(bond_right),
+            run_time=1
+        )
+
+        self.wait(0.5)
+
+        # Transform into DNA double helix
+        # Create DNA helix using parametric curves
+        def helix1(t):
+            return molecules_point + RIGHT * 0.3 * np.cos(2 * PI * t) + UP * (t - 0.5) * 1.5
+
+        def helix2(t):
+            return molecules_point + RIGHT * 0.3 * np.cos(2 * PI * t + PI) + UP * (t - 0.5) * 1.5
+
+        # Create the two strands
+        strand1 = ParametricFunction(
+            helix1,
+            t_range=[0, 1],
+            color=PURPLE_B,
+            stroke_width=3
+        )
+
+        strand2 = ParametricFunction(
+            helix2,
+            t_range=[0, 1],
+            color=PURPLE_C,
+            stroke_width=3
+        )
+
+        # Create base pairs (rungs connecting the two strands)
+        num_rungs = 5
+        rungs = VGroup()
+        for i in range(num_rungs):
+            t = i / (num_rungs - 1)
+            point1 = helix1(t)
+            point2 = helix2(t)
+            rung = Line(point1, point2, color=PURPLE, stroke_width=2, stroke_opacity=0.6)
+            rungs.add(rung)
+
+        dna_helix = VGroup(strand1, strand2, rungs)
+
+        # Transform simple molecule into DNA
+        self.play(
+            FadeOut(simple_molecule),
+            run_time=0.5
+        )
+
+        self.play(
+            Create(strand1),
+            Create(strand2),
+            run_time=2,
+            rate_func=smooth
+        )
+
+        self.play(
+            LaggedStart(
+                *[Create(rung) for rung in rungs],
+                lag_ratio=0.2
+            ),
+            run_time=1.5
+        )
+
         self.wait(1)
+
+        # Add "Molecules" label
+        molecules_label = Text("Molecules", font_size=28, color=PURPLE)
+        molecules_label.next_to(molecules_point, RIGHT, buff=0.7)
+
+        # Label line
+        molecules_label_line = Line(
+            molecules_point,
+            molecules_label.get_corner(LEFT),
+            color=PURPLE,
+            stroke_width=1.5,
+            stroke_opacity=0.6
+        )
+
+        self.play(
+            Create(molecules_label_line),
+            Write(molecules_label),
+            run_time=1
+        )
+
+        self.wait(2)
