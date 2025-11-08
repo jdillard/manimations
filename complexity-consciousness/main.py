@@ -2,6 +2,11 @@ from manim import *
 
 class ComplexityConsciousness(Scene):
     def construct(self):
+        # ===== COMMIT 10: FINAL POLISH =====
+        # High quality render settings applied via command line:
+        # For 1080p60: manim -pqh --fps 60 complexity-consciousness/main.py ComplexityConsciousness
+        # Duration: ~75 seconds (60-90 second target met)
+
         # Set dark background
         self.camera.background_color = "#001a33"  # Dark blue
 
@@ -252,9 +257,18 @@ class ComplexityConsciousness(Scene):
             stroke_opacity=0.6
         )
 
+        # Add subtitle explanation (COMMIT 10)
+        atoms_subtitle = Text(
+            "Elementary particles organize into stable atomic structures",
+            font_size=20,
+            color=BLUE_C,
+            opacity=0.7
+        ).to_edge(DOWN, buff=0.3)
+
         self.play(
             Create(label_line),
             Write(atoms_label),
+            FadeIn(atoms_subtitle, shift=UP * 0.2),
             run_time=1
         )
 
@@ -282,6 +296,7 @@ class ComplexityConsciousness(Scene):
             FadeOut(atom_structure),
             FadeOut(atoms_label),
             FadeOut(label_line),
+            FadeOut(atoms_subtitle),
             run_time=1.5
         )
 
@@ -398,9 +413,18 @@ class ComplexityConsciousness(Scene):
             stroke_opacity=0.6
         )
 
+        # Add subtitle explanation (COMMIT 10)
+        molecules_subtitle = Text(
+            "Atoms bond to form complex molecules - the building blocks of life",
+            font_size=20,
+            color=PURPLE,
+            opacity=0.7
+        ).to_edge(DOWN, buff=0.3)
+
         self.play(
             Create(molecules_label_line),
             Write(molecules_label),
+            FadeIn(molecules_subtitle, shift=UP * 0.2),
             run_time=1
         )
 
@@ -419,6 +443,7 @@ class ComplexityConsciousness(Scene):
             FadeOut(dna_helix),
             FadeOut(molecules_label),
             FadeOut(molecules_label_line),
+            FadeOut(molecules_subtitle),
             run_time=1.5
         )
 
@@ -530,9 +555,18 @@ class ComplexityConsciousness(Scene):
             stroke_opacity=0.6
         )
 
+        # Add subtitle explanation (COMMIT 10)
+        cells_subtitle = Text(
+            "Molecules organize into living cells with internal structure and metabolism",
+            font_size=20,
+            color=ORANGE,
+            opacity=0.7
+        ).to_edge(DOWN, buff=0.3)
+
         self.play(
             Create(cells_label_line),
             Write(cells_label),
+            FadeIn(cells_subtitle, shift=UP * 0.2),
             run_time=1
         )
 
@@ -560,6 +594,7 @@ class ComplexityConsciousness(Scene):
             FadeOut(cell_organelles),
             FadeOut(cells_label),
             FadeOut(cells_label_line),
+            FadeOut(cells_subtitle),
             run_time=1.5
         )
 
@@ -723,9 +758,18 @@ class ComplexityConsciousness(Scene):
             stroke_opacity=0.6
         )
 
+        # Add subtitle explanation (COMMIT 10)
+        organisms_subtitle = Text(
+            "Cells unite to form organisms with nervous systems and conscious awareness",
+            font_size=20,
+            color=RED,
+            opacity=0.7
+        ).to_edge(DOWN, buff=0.3)
+
         self.play(
             Create(organisms_label_line),
             Write(organisms_label),
+            FadeIn(organisms_subtitle, shift=UP * 0.2),
             run_time=1
         )
 
@@ -746,6 +790,7 @@ class ComplexityConsciousness(Scene):
             FadeOut(neural_connections),
             FadeOut(organisms_label),
             FadeOut(organisms_label_line),
+            FadeOut(organisms_subtitle),
             run_time=1.5
         )
 
@@ -906,9 +951,18 @@ class ComplexityConsciousness(Scene):
             stroke_opacity=0.6
         )
 
+        # Add subtitle explanation (COMMIT 10)
+        noosphere_subtitle = Text(
+            "Humanity forms a planetary sphere of collective consciousness and thought",
+            font_size=20,
+            color=GOLD,
+            opacity=0.7
+        ).to_edge(DOWN, buff=0.3)
+
         self.play(
             Create(noosphere_label_line),
             Write(noosphere_label),
+            FadeIn(noosphere_subtitle, shift=UP * 0.2),
             run_time=1
         )
 
@@ -920,4 +974,37 @@ class ComplexityConsciousness(Scene):
             rate_func=there_and_back
         )
 
-        self.wait(3)
+        self.wait(1)
+
+        # ===== COMMIT 9: SMOOTH TRANSITIONS & TIMING =====
+
+        # Slowly zoom out to show the complete evolutionary journey
+        # Group everything for the final zoom out
+        everything = VGroup(
+            grid, axes, x_label, y_label, title,
+            glow_soft, glow, curve,
+            stage_marker,
+            earth_group, brains, earth_connections, connections,
+            noosphere_sphere, sphere_glow,
+            noosphere_label, noosphere_label_line
+        )
+
+        # Zoom out smoothly to reveal the full journey
+        self.play(
+            everything.animate.scale(0.88).shift(DOWN * 0.25),
+            FadeOut(noosphere_subtitle),
+            run_time=4,
+            rate_func=smooth
+        )
+
+        self.wait(0.5)
+
+        # Final celebratory pulse of the noosphere
+        self.play(
+            noosphere_sphere.animate.scale(1.12),
+            sphere_glow.animate.scale(1.12),
+            run_time=2,
+            rate_func=there_and_back
+        )
+
+        self.wait(2)
