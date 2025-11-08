@@ -81,4 +81,58 @@ class ComplexityConsciousness(Scene):
             run_time=1.5
         )
 
+        self.wait(0.5)
+
+        # ===== COMMIT 2: THE CORRELATION CURVE =====
+
+        # Define the complexity-consciousness correlation function
+        # Using a logarithmic curve that starts near origin and curves upward
+        def complexity_curve(x):
+            # Logarithmic growth: y = a * log(x + 1) + b * x^0.7
+            # This creates a curve that accelerates upward
+            return 2.5 * np.log(x + 1) + 0.4 * (x ** 0.7)
+
+        # Create the main curve
+        curve = axes.plot(
+            complexity_curve,
+            x_range=[0, 9.5],
+            color=BLUE,
+            stroke_width=4,
+        )
+
+        # Apply gradient coloring: blue → purple → orange → white
+        curve.set_color_by_gradient(BLUE, PURPLE, ORANGE, WHITE)
+
+        # Create glow effect (wider, semi-transparent copy behind the curve)
+        glow = axes.plot(
+            complexity_curve,
+            x_range=[0, 9.5],
+            stroke_width=12,
+            stroke_opacity=0.4,
+        )
+        glow.set_color_by_gradient(BLUE, PURPLE, ORANGE, WHITE)
+
+        # Create a second, softer glow layer
+        glow_soft = axes.plot(
+            complexity_curve,
+            x_range=[0, 9.5],
+            stroke_width=20,
+            stroke_opacity=0.2,
+        )
+        glow_soft.set_color_by_gradient(BLUE, PURPLE, ORANGE, WHITE)
+
+        # Animate the curve drawing from left to right
+        self.play(
+            Create(glow_soft),
+            run_time=2.5,
+            rate_func=smooth
+        )
+
+        self.play(
+            Create(glow),
+            Create(curve),
+            run_time=2.5,
+            rate_func=smooth
+        )
+
         self.wait(2)
