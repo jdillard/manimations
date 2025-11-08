@@ -404,4 +404,144 @@ class ComplexityConsciousness(Scene):
             run_time=1
         )
 
-        self.wait(2)
+        self.wait(1)
+
+        # ===== COMMIT 5: STAGE 3 - CELLS =====
+
+        # Define position on curve for cells (even higher complexity)
+        cells_x = 5.5
+        cells_y = complexity_curve(cells_x)
+        cells_point = axes.coords_to_point(cells_x, cells_y)
+
+        # Move marker to new position and fade out DNA
+        self.play(
+            stage_marker.animate.move_to(cells_point).set_color(ORANGE),
+            FadeOut(dna_helix),
+            FadeOut(molecules_label),
+            FadeOut(molecules_label_line),
+            run_time=1.5
+        )
+
+        self.wait(0.5)
+
+        # Create cell membrane (outer circle)
+        cell_membrane = Circle(
+            radius=0.8,
+            color=ORANGE,
+            stroke_width=3,
+            fill_opacity=0.05,
+            fill_color=ORANGE
+        ).move_to(cells_point)
+
+        # Create nucleus (large central organelle)
+        cell_nucleus = Circle(
+            radius=0.25,
+            color=ORANGE,
+            stroke_width=2,
+            fill_opacity=0.3,
+            fill_color=ORANGE
+        ).move_to(cells_point)
+
+        # Create mitochondria (smaller oval organelles)
+        mitochondria1 = Ellipse(
+            width=0.3,
+            height=0.15,
+            color=RED_E,
+            stroke_width=1.5,
+            fill_opacity=0.25,
+            fill_color=RED_E
+        ).move_to(cells_point + UP * 0.35 + LEFT * 0.2)
+
+        mitochondria2 = Ellipse(
+            width=0.3,
+            height=0.15,
+            color=RED_E,
+            stroke_width=1.5,
+            fill_opacity=0.25,
+            fill_color=RED_E
+        ).move_to(cells_point + DOWN * 0.3 + RIGHT * 0.25).rotate(PI / 4)
+
+        # Additional small organelles (vesicles)
+        vesicle1 = Dot(
+            cells_point + UP * 0.2 + RIGHT * 0.3,
+            color=YELLOW_E,
+            radius=0.06
+        )
+
+        vesicle2 = Dot(
+            cells_point + DOWN * 0.15 + LEFT * 0.35,
+            color=YELLOW_E,
+            radius=0.06
+        )
+
+        cell_organelles = VGroup(cell_nucleus, mitochondria1, mitochondria2, vesicle1, vesicle2)
+
+        # Animate cell appearing
+        self.play(
+            Create(cell_membrane),
+            run_time=1.5
+        )
+
+        # Animate organelles appearing
+        self.play(
+            FadeIn(cell_nucleus),
+            run_time=0.8
+        )
+
+        self.play(
+            LaggedStart(
+                FadeIn(mitochondria1),
+                FadeIn(mitochondria2),
+                FadeIn(vesicle1),
+                FadeIn(vesicle2),
+                lag_ratio=0.3
+            ),
+            run_time=1.5
+        )
+
+        self.wait(0.5)
+
+        # Create pulsing/breathing animation for cell membrane
+        # Use simple scale animations for the pulsing effect
+        self.play(
+            cell_membrane.animate.scale(1.08),
+            cell_organelles.animate.scale(1.04),
+            run_time=1.5,
+            rate_func=there_and_back
+        )
+
+        self.play(
+            cell_membrane.animate.scale(1.08),
+            cell_organelles.animate.scale(1.04),
+            run_time=1.5,
+            rate_func=there_and_back
+        )
+
+        # Add "Cells" label
+        cells_label = Text("Cells", font_size=28, color=ORANGE)
+        cells_label.next_to(cells_point, RIGHT + DOWN, buff=0.6)
+
+        # Label line
+        cells_label_line = Line(
+            cells_point + RIGHT * 0.8,
+            cells_label.get_corner(UP + LEFT),
+            color=ORANGE,
+            stroke_width=1.5,
+            stroke_opacity=0.6
+        )
+
+        self.play(
+            Create(cells_label_line),
+            Write(cells_label),
+            run_time=1
+        )
+
+        # Continue pulsing effect
+        self.play(
+            cell_membrane.animate.scale(1.08),
+            cell_organelles.animate.scale(1.04),
+            run_time=1.5,
+            rate_func=there_and_back
+        )
+
+        self.wait(1)
