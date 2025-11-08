@@ -729,4 +729,195 @@ class ComplexityConsciousness(Scene):
             run_time=1
         )
 
-        self.wait(2)
+        self.wait(1)
+
+        # ===== COMMIT 7: STAGE 5 - NOOSPHERE =====
+
+        # Define position on curve for noosphere (very high complexity)
+        noosphere_x = 8.5
+        noosphere_y = complexity_curve(noosphere_x)
+        noosphere_point = axes.coords_to_point(noosphere_x, noosphere_y)
+
+        # Move marker to new position and fade out organisms
+        self.play(
+            stage_marker.animate.move_to(noosphere_point).set_color(GOLD),
+            FadeOut(cells_network),
+            FadeOut(brain_node),
+            FadeOut(neural_connections),
+            FadeOut(organisms_label),
+            FadeOut(organisms_label_line),
+            run_time=1.5
+        )
+
+        self.wait(0.5)
+
+        # Create small Earth at center
+        earth = Circle(
+            radius=0.3,
+            color=BLUE,
+            stroke_width=2,
+            fill_opacity=0.3,
+            fill_color=BLUE
+        ).move_to(noosphere_point)
+
+        # Add simple continents/texture to Earth
+        earth_detail1 = Arc(
+            radius=0.25,
+            angle=PI/2,
+            color=GREEN,
+            stroke_width=1.5
+        ).move_to(noosphere_point + UP * 0.1 + LEFT * 0.05)
+
+        earth_detail2 = Dot(
+            noosphere_point + DOWN * 0.15 + RIGHT * 0.1,
+            color=GREEN,
+            radius=0.08
+        )
+
+        earth_group = VGroup(earth, earth_detail1, earth_detail2)
+
+        self.play(
+            FadeIn(earth_group),
+            run_time=1
+        )
+
+        self.wait(0.5)
+
+        # Create brain/head silhouettes around Earth
+        num_brains = 8
+        brain_radius = 1.2  # Distance from center
+        brains = VGroup()
+
+        for i in range(num_brains):
+            angle = i * 2 * PI / num_brains
+            pos = noosphere_point + RIGHT * brain_radius * np.cos(angle) + UP * brain_radius * np.sin(angle)
+
+            # Simple brain silhouette (circle with a small detail)
+            brain_circle = Circle(
+                radius=0.15,
+                color=WHITE,
+                stroke_width=2,
+                fill_opacity=0.2,
+                fill_color=WHITE
+            ).move_to(pos)
+
+            brains.add(brain_circle)
+
+        # Animate brains appearing
+        self.play(
+            LaggedStart(
+                *[FadeIn(brain, scale=0.5) for brain in brains],
+                lag_ratio=0.1
+            ),
+            run_time=2
+        )
+
+        self.wait(0.5)
+
+        # Create dense network of connections between brains
+        connections = VGroup()
+
+        # Connect each brain to multiple others
+        for i in range(num_brains):
+            # Connect to next 3 brains in the circle
+            for j in range(1, 4):
+                next_idx = (i + j) % num_brains
+                line = Line(
+                    brains[i].get_center(),
+                    brains[next_idx].get_center(),
+                    color=GOLD,
+                    stroke_width=1.5,
+                    stroke_opacity=0.5
+                )
+                connections.add(line)
+
+        # Add connections from brains to Earth (collective consciousness)
+        earth_connections = VGroup()
+        for brain in brains:
+            line = Line(
+                brain.get_center(),
+                noosphere_point,
+                color=YELLOW,
+                stroke_width=1,
+                stroke_opacity=0.3
+            )
+            earth_connections.add(line)
+
+        # Animate network forming
+        self.play(
+            LaggedStart(
+                *[Create(line) for line in earth_connections],
+                lag_ratio=0.05
+            ),
+            run_time=2
+        )
+
+        self.play(
+            LaggedStart(
+                *[Create(line) for line in connections],
+                lag_ratio=0.02
+            ),
+            run_time=2.5
+        )
+
+        self.wait(0.5)
+
+        # Create sphere around the network (noosphere boundary)
+        noosphere_sphere = Circle(
+            radius=brain_radius + 0.3,
+            color=GOLD,
+            stroke_width=2,
+            stroke_opacity=0.6
+        ).move_to(noosphere_point)
+
+        # Create a subtle glow around the sphere
+        sphere_glow = Circle(
+            radius=brain_radius + 0.4,
+            color=WHITE,
+            stroke_width=4,
+            stroke_opacity=0.3
+        ).move_to(noosphere_point)
+
+        self.play(
+            Create(sphere_glow),
+            Create(noosphere_sphere),
+            run_time=2,
+            rate_func=smooth
+        )
+
+        # Pulse the entire noosphere
+        self.play(
+            noosphere_sphere.animate.scale(1.1),
+            sphere_glow.animate.scale(1.1),
+            run_time=1,
+            rate_func=there_and_back
+        )
+
+        # Add "Noosphere" label
+        noosphere_label = Text("Noosphere", font_size=28, color=GOLD)
+        noosphere_label.next_to(noosphere_point, DOWN, buff=1.8)
+
+        # Label line
+        noosphere_label_line = Line(
+            noosphere_point + DOWN * (brain_radius + 0.3),
+            noosphere_label.get_top(),
+            color=GOLD,
+            stroke_width=1.5,
+            stroke_opacity=0.6
+        )
+
+        self.play(
+            Create(noosphere_label_line),
+            Write(noosphere_label),
+            run_time=1
+        )
+
+        # Final pulse showing the living noosphere
+        self.play(
+            noosphere_sphere.animate.scale(1.08),
+            sphere_glow.animate.scale(1.08),
+            run_time=1.5,
+            rate_func=there_and_back
+        )
+
+        self.wait(3)
